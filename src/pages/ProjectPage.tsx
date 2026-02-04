@@ -191,6 +191,7 @@ export default function ProjectPage() {
                                 className="worker-img"
                             />
                             <span className="worker-name">{worker.name}</span>
+                            <span className="worker-role">{worker.role}</span>
                         </div>
                     ))}
                 </div>

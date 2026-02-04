@@ -29,6 +29,8 @@
     gap: 1rem;
     overflow-x: auto;
     padding: 0.5rem;
+    padding-bottom: 1rem;
+    /* 하단 여백 추가 (역할 표시 공간) */
 }
 
 .worker-avatar {
@@ -62,7 +64,16 @@
     font-size: 0.8rem;
     margin-top: 0.25rem;
     color: var(--text-primary);
-    font-weight: 500;
+    font-weight: 700;
+}
+
+.worker-role {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    background-color: var(--bg-secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 2px;
 }
 
 /* Zone 2: 업무 계획표 (Backlog) */
