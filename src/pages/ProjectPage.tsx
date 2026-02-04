@@ -2,28 +2,38 @@ import { useState } from 'react';
 import './ProjectPage.css';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 
-// 데이터 인터페이스 정의
+// --------------------------------------------------------------------------
+// 데이터 인터페이스 정의 (Data Interfaces)
+// --------------------------------------------------------------------------
+
+// 작업자(Worker) 정보: ID, 이름, 직군(Role)을 포함합니다.
 interface Worker {
     id: number;
     name: string;
     role: string;
 }
 
+// 대기 중인 업무(PendingTask): 아직 배정되지 않은 할 일입니다.
 interface PendingTask {
     id: number;
-    title: string;
-    part: 'Client' | 'Server' | 'Art' | 'Design';
+    title: string; // 업무 내용
+    part: 'Client' | 'Server' | 'Art' | 'Design'; // 담당 파트
 }
 
+// 진행 중인 업무(ActiveTask): 작업자가 배정되어 칸반 보드에 올라간 업무입니다.
 interface ActiveTask {
     id: number;
     title: string;
-    tag: string;
-    assignee: Worker; // 작업자 객체 포함
-    status: 'ToDo' | 'InProgress' | 'Done';
+    tag: string; // 파트 태그
+    assignee: Worker; // 배정된 작업자 (Worker 객체 전체를 포함)
+    status: 'ToDo' | 'InProgress' | 'Done'; // 현재 진행 상태
 }
 
-// 초기 데이터
+// --------------------------------------------------------------------------
+// 초기 데이터 (Initial Mock Data)
+// --------------------------------------------------------------------------
+
+// 전체 작업자 목록 (총 12명, 게임 개발 직군)
 const workers: Worker[] = [
     { id: 1, name: '강민혁', role: 'PD' },
     { id: 2, name: '김철수', role: 'Client' },
@@ -39,6 +49,8 @@ const workers: Worker[] = [
     { id: 12, name: '오세윤', role: 'Sound' },
 ];
 
+// 초기 대기 업무 목록 (Backlog Data)
+// 각 파트별로 충분한 수량의 더미 데이터를 심어두었습니다.
 const initialPendingTasks: PendingTask[] = [
     // Client Part (25 tasks)
     { id: 101, title: '인벤토리 시스템 구조 설계', part: 'Client' },
@@ -93,64 +105,93 @@ const initialPendingTasks: PendingTask[] = [
 ];
 
 export default function ProjectPage() {
+    // 스크롤 애니메이션 훅 사용 (페이지 진입 시 부드럽게 나타남)
     const { ref, isVisible } = useScrollAnimation();
 
+    // 상태 관리 (State Management)
+    // pendingTasks: 대기 중인 업무 목록 (Backlog)
+    // activeTasks: 작업자가 배정되어 진행 중인 업무 (Kanban)
     const [pendingTasks, setPendingTasks] = useState<PendingTask[]>(initialPendingTasks);
     const [activeTasks, setActiveTasks] = useState<ActiveTask[]>([]);
 
-    // 드래그 상태 관리
-    const [draggedWorker, setDraggedWorker] = useState<Worker | null>(null);
-    const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
+    // 드래그 앤 드롭 상태 (Drag State)
+    const [draggedWorker, setDraggedWorker] = useState<Worker | null>(null); // 드래그 중인 작업자
+    const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null); // 드래그 중인 칸반 카드
 
-    // 1. 작업자 드래그 시작 (Zone 1 -> Zone 2)
+    // ----------------------------------------------------------------------
+    // 이벤트 핸들러 (Event Handlers)
+    // ----------------------------------------------------------------------
+
+    /**
+     * 1. 작업자 드래그 시작 (Zone 1 -> Zone 2)
+     * 사용자가 작업자 아바타를 끌기 시작할 때 실행됩니다.
+     */
     const handleWorkerDragStart = (worker: Worker) => {
         setDraggedWorker(worker);
     };
 
-    // 2. 업무 계획 위에 드롭 (Zone 2)
+    /**
+     * 2. 업무 배정 (Merge Drop)
+     * 작업자를 대기 업무(Backlog Card) 위에 떨어뜨렸을 때 실행됩니다.
+     * 대기 업무를 삭제하고, 작업자 정보와 합쳐서 '활성 업무(ToDo)'로 만듭니다.
+     */
     const handleMergeDrop = (task: PendingTask) => {
         if (!draggedWorker) return;
 
-        // 대기열에서 제거
+        // 1) 기존 대기목록에서 해당 업무 제거
         setPendingTasks(prev => prev.filter(t => t.id !== task.id));
 
-        // 활성 작업으로 추가 (Merge)
+        // 2) 새로운 활성 업무(Active Task) 생성 (상태는 ToDo로 시작)
         const newActiveTask: ActiveTask = {
             id: task.id,
             title: task.title,
             tag: task.part,
-            assignee: draggedWorker,
+            assignee: draggedWorker, // 드래그한 작업자 배정
             status: 'ToDo'
         };
 
+        // 3) 칸반 보드에 추가
         setActiveTasks(prev => [...prev, newActiveTask]);
-        setDraggedWorker(null);
+        setDraggedWorker(null); // 드래그 상태 초기화
     };
 
-    // 3. 활성 작업 드래그 시작 (Zone 3 내부 이동)
+    /**
+     * 3. 칸반 카드 드래그 시작 (Zone 3 내부 이동)
+     * 칸반 보드 내에서 카드를 이동시킬 때 실행됩니다.
+     */
     const handleTaskDragStart = (taskId: number) => {
         setDraggedTaskId(taskId);
     };
 
-    // 4. 칸반 컬럼에 드롭 (Zone 3)
+    /**
+     * 4. 칸반 컬럼 드롭 (Status 변경)
+     * 카드를 다른 컬럼(예: ToDo -> InProgress)에 떨어뜨렸을 때 실행됩니다.
+     */
     const handleKanbanDrop = (status: ActiveTask['status']) => {
         if (draggedTaskId === null) return;
 
+        // 해당 카드의 상태(status)만 변경하여 업데이트
         setActiveTasks(prev => prev.map(t =>
             t.id === draggedTaskId ? { ...t, status } : t
         ));
         setDraggedTaskId(null);
     };
 
-    // 5. 작업 삭제 핸들러 (Active Task)
+    /**
+     * 5. 진행 업무 삭제 핸들러
+     * 칸반 보드의 카드를 삭제합니다. (복구 불가 경고창 띄움)
+     */
     const handleDeleteTask = (e: React.MouseEvent, taskId: number) => {
-        e.stopPropagation(); // 드래그 이벤트 전파 방지
+        e.stopPropagation(); // 드래그 이벤트 등으로 전파되는 것 방지
         if (confirm('정말 이 작업을 삭제하시겠습니까? (다시 대기열로 돌아가지 않습니다)')) {
             setActiveTasks(prev => prev.filter(t => t.id !== taskId));
         }
     };
 
-    // 6. 업무 계획 추가 핸들러 (Pending Task)
+    /**
+     * 6. 새로운 업무 추가 (User Input)
+     * 사용자가 대기열(Backlog)에 직접 업무를 입력하여 추가하는 기능입니다.
+     */
     const [newTasks, setNewTasks] = useState<{ [key: string]: string }>({
         Client: '', Server: '', Art: '', Design: ''
     });
@@ -164,13 +205,13 @@ export default function ProjectPage() {
         if (!title) return;
 
         const newTask: PendingTask = {
-            id: Date.now(), // 간단한 ID 생성
+            id: Date.now(), // 현재 시간으로 고유 ID 생성
             title: title,
             part: part
         };
 
-        setPendingTasks(prev => [newTask, ...prev]); // 맨 앞에 추가
-        setNewTasks(prev => ({ ...prev, [part]: '' })); // 입력창 초기화
+        setPendingTasks(prev => [newTask, ...prev]); // 목록 맨 앞에 추가
+        setNewTasks(prev => ({ ...prev, [part]: '' })); // 입력창 비우기
     };
 
     const handleKeyDown = (e: React.KeyboardEvent, part: 'Client' | 'Server' | 'Art' | 'Design') => {
@@ -179,7 +220,10 @@ export default function ProjectPage() {
         }
     };
 
-    // 7. 업무 계획 삭제 핸들러 (Pending Task)
+    /**
+     * 7. 대기 업무 삭제 (Pending Task)
+     * 아직 시작하지 않은 대기열의 업무를 삭제합니다.
+     */
     const handleDeletePendingTask = (e: React.MouseEvent, taskId: number) => {
         e.stopPropagation();
         if (confirm('이 업무 계획을 삭제하시겠습니까?')) {
@@ -187,6 +231,7 @@ export default function ProjectPage() {
         }
     };
 
+    // 드래그 중인 요소가 드롭존 위에 있을 때 기본 동작 방지 (필수)
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
     };
