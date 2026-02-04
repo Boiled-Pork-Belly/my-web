@@ -110,6 +110,37 @@
     gap: 0.5rem;
 }
 
+/* 추가된 업무 추가 폼 스타일 */
+.add-task-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.add-task-input {
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+}
+
+.add-task-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    width: 2rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.add-task-btn:hover {
+    opacity: 0.9;
+}
+
 .pending-task-list {
     /* overflow-y: auto; <- 내부 스크롤 제거 */
     flex-grow: 1;
@@ -126,6 +157,31 @@
     font-size: 0.9rem;
     color: var(--text-primary);
     transition: all 0.2s;
+    display: flex;
+    /* 삭제 버튼 배치를 위해 flex 적용 */
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pending-task-card:hover .delete-pending-btn {
+    opacity: 1;
+}
+
+.delete-pending-btn {
+    opacity: 0;
+    transition: opacity 0.2s;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0 0.3rem;
+    margin-left: 0.5rem;
+}
+
+.delete-pending-btn:hover {
+    color: #ef4444;
+    /* Red color on hover */
 }
 
 .pending-task-card.drag-over {

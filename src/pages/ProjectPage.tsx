@@ -142,11 +142,48 @@ export default function ProjectPage() {
         setDraggedTaskId(null);
     };
 
-    // 5. 작업 삭제 핸들러 (추가됨)
+    // 5. 작업 삭제 핸들러 (Active Task)
     const handleDeleteTask = (e: React.MouseEvent, taskId: number) => {
         e.stopPropagation(); // 드래그 이벤트 전파 방지
         if (confirm('정말 이 작업을 삭제하시겠습니까? (다시 대기열로 돌아가지 않습니다)')) {
             setActiveTasks(prev => prev.filter(t => t.id !== taskId));
+        }
+    };
+
+    // 6. 업무 계획 추가 핸들러 (Pending Task)
+    const [newTasks, setNewTasks] = useState<{ [key: string]: string }>({
+        Client: '', Server: '', Art: '', Design: ''
+    });
+
+    const handleAddTaskInput = (part: string, value: string) => {
+        setNewTasks(prev => ({ ...prev, [part]: value }));
+    };
+
+    const handleAddTask = (part: 'Client' | 'Server' | 'Art' | 'Design') => {
+        const title = newTasks[part].trim();
+        if (!title) return;
+
+        const newTask: PendingTask = {
+            id: Date.now(), // 간단한 ID 생성
+            title: title,
+            part: part
+        };
+
+        setPendingTasks(prev => [newTask, ...prev]); // 맨 앞에 추가
+        setNewTasks(prev => ({ ...prev, [part]: '' })); // 입력창 초기화
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent, part: 'Client' | 'Server' | 'Art' | 'Design') => {
+        if (e.key === 'Enter') {
+            handleAddTask(part);
+        }
+    };
+
+    // 7. 업무 계획 삭제 핸들러 (Pending Task)
+    const handleDeletePendingTask = (e: React.MouseEvent, taskId: number) => {
+        e.stopPropagation();
+        if (confirm('이 업무 계획을 삭제하시겠습니까?')) {
+            setPendingTasks(prev => prev.filter(t => t.id !== taskId));
         }
     };
 
@@ -199,12 +236,26 @@ export default function ProjectPage() {
 
             {/* ZONE 2: PENDING TASKS (DROP ZONE) */}
             <div className="backlog-zone">
-                {['Client', 'Server', 'Art', 'Design'].map(part => (
+                {(['Client', 'Server', 'Art', 'Design'] as const).map(part => (
                     <div key={part} className="backlog-column">
                         <div className="part-header">
                             <span>{part === 'Art' || part === 'Design' ? '🎨' : '💻'}</span>
                             {part} Part
                         </div>
+
+                        {/* 업무 추가 입력창 */}
+                        <div className="add-task-form">
+                            <input
+                                type="text"
+                                className="add-task-input"
+                                placeholder="업무 추가..."
+                                value={newTasks[part]}
+                                onChange={(e) => handleAddTaskInput(part, e.target.value)}
+                                onKeyDown={(e) => handleKeyDown(e, part)}
+                            />
+                            <button className="add-task-btn" onClick={() => handleAddTask(part)}>+</button>
+                        </div>
+
                         <div className="pending-task-list">
                             {pendingTasks.filter(t => t.part === part).map(task => (
                                 <div
@@ -213,7 +264,12 @@ export default function ProjectPage() {
                                     onDragOver={handleDragOver}
                                     onDrop={() => handleMergeDrop(task)}
                                 >
-                                    {task.title}
+                                    <span>{task.title}</span>
+                                    <button
+                                        className="delete-pending-btn"
+                                        onClick={(e) => handleDeletePendingTask(e, task.id)}
+                                        title="삭제"
+                                    >✕</button>
                                 </div>
                             ))}
                             {pendingTasks.filter(t => t.part === part).length === 0 && (
