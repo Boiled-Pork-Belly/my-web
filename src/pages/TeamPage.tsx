@@ -1,6 +1,7 @@
 import './TeamPage.css';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import type { Member } from '../types/Member';
+import WeatherWidget from '../components/WeatherWidget'; // 날씨 위젯 추가
 
 const members: Member[] = [
     {
@@ -149,6 +150,11 @@ export default function TeamPage() {
                 <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
                     최고의 결과를 만들기 위해 열정적으로 일하는 동료들을 소개합니다.
                 </p>
+            </div>
+
+            {/* 팀원들에게 보여줄 현재 날씨 */}
+            <div style={{ marginBottom: '3rem' }}>
+                <WeatherWidget />
             </div>
 
             <div className="team-grid">

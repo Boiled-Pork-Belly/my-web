@@ -54,6 +54,7 @@
     line-height: 1;
     background: linear-gradient(to right, #fff, #94a3b8);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     text-transform: uppercase;
     letter-spacing: -2px;
@@ -188,6 +189,7 @@
     font-weight: 900;
     background: linear-gradient(to bottom, #fff, #64748b);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 

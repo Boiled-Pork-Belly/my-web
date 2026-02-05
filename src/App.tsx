@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import TeamPage from './pages/TeamPage';
 import ProjectPage from './pages/ProjectPage';
+import WeatherPage from './pages/WeatherPage'; // 날씨 페이지 추가
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="team" element={<TeamPage />} />
           <Route path="project" element={<ProjectPage />} />
+          <Route path="weather" element={<WeatherPage />} /> {/* 날씨 경로 추가 */}
         </Route>
       </Routes>
     </BrowserRouter>

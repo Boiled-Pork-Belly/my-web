@@ -29,6 +29,9 @@ export default function NavBar() {
                 <li>
                     <NavLink to="/project" style={linkStyle}>프로젝트</NavLink>
                 </li>
+                <li>
+                    <NavLink to="/weather" style={linkStyle}>🌤️ 날씨</NavLink>
+                </li>
             </ul>
         </nav>
     );

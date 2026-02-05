@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import WeatherWidget from '../components/WeatherWidget'; // 날씨 위젯 추가
 
 export default function HomePage() {
     const navigate = useNavigate(); // 페이지 이동을 위한 훅
@@ -97,6 +98,14 @@ export default function HomePage() {
                         <span className="stat-number">2026</span>
                         <span className="stat-label">GOTY Nominee</span>
                     </div>
+                </div>
+
+                {/* 날씨 위젯 - 스튜디오 현황 */}
+                <div style={{ marginTop: '3rem' }}>
+                    <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                        🏢 서울 스튜디오 현재 날씨
+                    </p>
+                    <WeatherWidget />
                 </div>
             </section>
         </div>
